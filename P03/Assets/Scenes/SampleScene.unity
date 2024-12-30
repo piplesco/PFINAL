@@ -580,18 +580,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bbb5cdabf023a9d4e83ad6fcbc473c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Controlador: {fileID: 0}
-  Camara: {fileID: 963194228}
-  Velocidad: 15
-  AlturaSalto: 2
-  Gravedad: -9.81
-  velocidad: {x: 0, y: 0, z: 0}
-  enElSuelo: 0
-  audioSource: {fileID: 0}
-  pasosRapidos: {fileID: 0}
-  pasosLentos: {fileID: 0}
-  corriendo: 0
-  caminando: 0
 --- !u!1 &1334850984
 GameObject:
   m_ObjectHideFlags: 0
