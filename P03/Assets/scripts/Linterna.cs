@@ -6,27 +6,20 @@ public class Linterna : MonoBehaviour
 {
     public Light LuzLinterna;
 
-
-
-    // Start is called before the first frame update
+    
     void Start()
     {
-        
+        LuzLinterna.enabled = false; // Apagar la linterna al inicio
     }
 
-    // Update is called once per frame
+    
     void Update()
     {
-      if(Input.GetKeyDown("f")){
-          
-        if(LuzLinterna.enabled == true){
-        
-            LuzLinterna.enabled = false;
+        if (Input.GetKeyDown("f"))
+        {
+            // abrircerrar linterna
+            LuzLinterna.enabled = !LuzLinterna.enabled;
         }
-        else if(LuzLinterna.enabled == false){
-        
-            LuzLinterna.enabled = true;
-        }
-      }  
     }
 }
+
