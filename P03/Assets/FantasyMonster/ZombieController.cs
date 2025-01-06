@@ -1,5 +1,5 @@
-using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine;
 
 public class ZombieController : MonoBehaviour
 {
@@ -7,15 +7,20 @@ public class ZombieController : MonoBehaviour
     public float attackRange = 2f;
     public float attackDamage = 25f;
     public float attackInterval = 3f;
-    public AudioClip zombieSound;
+    public AudioClip zombieSound; // Sonido de gruñido
+    public AudioClip walkSound;  // Sonido de pasos
+
+    public float minDistanceForMaxVolume = 2f;
+    public float maxDistanceForMinVolume = 10f;
 
     private NavMeshAgent agent;
     private Animator animator;
     private Transform player;
     private Codigo_salud playerHealth;
-    private AudioSource audioSource;
+    private AudioSource audioSource; // Para sonidos generales
+    private AudioSource walkAudioSource; // Para sonidos de caminar
     private float attackTimer;
-    private Vector3 wanderPoint; // Punto aleatorio al que el zombie se moverá al deambular
+    private Vector3 wanderPoint;
     private bool isWandering;
 
     public float walkSpeed = 2.5f;
@@ -24,14 +29,21 @@ public class ZombieController : MonoBehaviour
     {
         agent = GetComponent<NavMeshAgent>();
         animator = GetComponent<Animator>();
-        audioSource = GetComponent<AudioSource>();
+
+        AudioSource[] audioSources = GetComponents<AudioSource>();
+        audioSource = audioSources[0]; // Primer AudioSource para sonidos generales
+        walkAudioSource = audioSources.Length > 1 ? audioSources[1] : gameObject.AddComponent<AudioSource>();
+
         player = GameObject.FindWithTag("Player").transform;
         playerHealth = player.GetComponent<Codigo_salud>();
 
         agent.speed = walkSpeed;
 
-        // Generar el primer punto para deambular
-        GenerateWanderPoint();
+        // Configurar walkAudioSource
+        walkAudioSource.clip = walkSound;
+        walkAudioSource.loop = true; // Que el sonido se repita
+        walkAudioSource.playOnAwake = false; // No reproducir automáticamente
+        walkAudioSource.volume = 0f; // Inicia en volumen cero, ajustable según distancia
 
         InvokeRepeating("PlayZombieSound", 0, 7f);
     }
@@ -40,6 +52,9 @@ public class ZombieController : MonoBehaviour
     {
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
         attackTimer -= Time.deltaTime;
+
+        AdjustVolumeByDistance(distanceToPlayer);
+        AdjustWalkingSoundVolume(distanceToPlayer);
 
         if (distanceToPlayer <= detectionRange && distanceToPlayer > attackRange)
         {
@@ -57,11 +72,25 @@ public class ZombieController : MonoBehaviour
         {
             Wander();
         }
+
+        HandleWalkingSound();
+    }
+
+    void AdjustVolumeByDistance(float distance)
+    {
+        float volume = Mathf.InverseLerp(maxDistanceForMinVolume, minDistanceForMaxVolume, distance);
+        audioSource.volume = Mathf.Clamp01(volume);
+    }
+
+    void AdjustWalkingSoundVolume(float distance)
+    {
+        float volume = Mathf.InverseLerp(maxDistanceForMinVolume, minDistanceForMaxVolume, distance);
+        walkAudioSource.volume = Mathf.Clamp01(volume);
     }
 
     void ChasePlayer()
     {
-        isWandering = false; // Detener el comportamiento de deambular
+        isWandering = false;
         agent.SetDestination(player.position);
         animator.SetBool("isWalking", true);
         animator.SetBool("isAttacking", false);
@@ -69,7 +98,7 @@ public class ZombieController : MonoBehaviour
 
     void AttackPlayer()
     {
-        isWandering = false; // Detener el comportamiento de deambular
+        isWandering = false;
         agent.SetDestination(transform.position);
         animator.SetBool("isWalking", false);
         animator.SetBool("isAttacking", true);
@@ -89,27 +118,44 @@ public class ZombieController : MonoBehaviour
         animator.SetBool("isAttacking", false);
     }
 
+    void HandleWalkingSound()
+    {
+        if (animator.GetBool("isWalking") && !walkAudioSource.isPlaying)
+        {
+            walkAudioSource.Play();
+        }
+        else if (!animator.GetBool("isWalking") && walkAudioSource.isPlaying)
+        {
+            walkAudioSource.Stop();
+        }
+    }
+
     void GenerateWanderPoint()
     {
-        // Generar un punto aleatorio dentro de un rango para que el zombie deambule
         float wanderRadius = 10f;
-        Vector3 randomPoint = new Vector3(
-            transform.position.x + Random.Range(-wanderRadius, wanderRadius),
-            transform.position.y,
-            transform.position.z + Random.Range(-wanderRadius, wanderRadius)
+        Vector3 randomDirection = new Vector3(
+            Random.Range(-wanderRadius, wanderRadius),
+            0,
+            Random.Range(-wanderRadius, wanderRadius)
         );
 
+        randomDirection += transform.position;
+
         NavMeshHit hit;
-        if (NavMesh.SamplePosition(randomPoint, out hit, wanderRadius, NavMesh.AllAreas))
+        if (NavMesh.SamplePosition(randomDirection, out hit, wanderRadius, NavMesh.AllAreas))
         {
             wanderPoint = hit.position;
             isWandering = true;
+        }
+        else
+        {
+            isWandering = false;
         }
     }
 
     void PlayZombieSound()
     {
-        if (zombieSound != null)
+        if (audioSource != null && zombieSound != null)
         {
             audioSource.PlayOneShot(zombieSound);
         }
