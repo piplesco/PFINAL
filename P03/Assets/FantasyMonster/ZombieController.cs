@@ -15,8 +15,10 @@ public class ZombieController : MonoBehaviour
     private Codigo_salud playerHealth;
     private AudioSource audioSource;
     private float attackTimer;
+    private Vector3 wanderPoint; // Punto aleatorio al que el zombie se moverá al deambular
+    private bool isWandering;
 
-    public float walkSpeed = 2.5f;  // Velocidad ajustada para caminar un poco más rápido
+    public float walkSpeed = 2.5f;
 
     void Start()
     {
@@ -26,11 +28,10 @@ public class ZombieController : MonoBehaviour
         player = GameObject.FindWithTag("Player").transform;
         playerHealth = player.GetComponent<Codigo_salud>();
 
-        // Configurar la velocidad de caminar un poco más rápido
         agent.speed = walkSpeed;
 
-        // Establecer un destino predeterminado para que el zombie se mueva al inicio
-        SetInitialDestination();
+        // Generar el primer punto para deambular
+        GenerateWanderPoint();
 
         InvokeRepeating("PlayZombieSound", 0, 7f);
     }
@@ -58,16 +59,9 @@ public class ZombieController : MonoBehaviour
         }
     }
 
-    void SetInitialDestination()
-    {
-        // Establece un destino predeterminado (puede ser un punto aleatorio o el jugador)
-        Vector3 randomPoint = new Vector3(Random.Range(-10, 10), transform.position.y, Random.Range(-10, 10));
-        agent.SetDestination(randomPoint);
-        animator.SetBool("isWalking", true);  // Asegúrate de que la animación se reproduzca
-    }
-
     void ChasePlayer()
     {
+        isWandering = false; // Detener el comportamiento de deambular
         agent.SetDestination(player.position);
         animator.SetBool("isWalking", true);
         animator.SetBool("isAttacking", false);
@@ -75,6 +69,7 @@ public class ZombieController : MonoBehaviour
 
     void AttackPlayer()
     {
+        isWandering = false; // Detener el comportamiento de deambular
         agent.SetDestination(transform.position);
         animator.SetBool("isWalking", false);
         animator.SetBool("isAttacking", true);
@@ -84,8 +79,32 @@ public class ZombieController : MonoBehaviour
 
     void Wander()
     {
-        animator.SetBool("isWalking", false);
+        if (!isWandering || Vector3.Distance(transform.position, wanderPoint) < 1f)
+        {
+            GenerateWanderPoint();
+        }
+
+        agent.SetDestination(wanderPoint);
+        animator.SetBool("isWalking", true);
         animator.SetBool("isAttacking", false);
+    }
+
+    void GenerateWanderPoint()
+    {
+        // Generar un punto aleatorio dentro de un rango para que el zombie deambule
+        float wanderRadius = 10f;
+        Vector3 randomPoint = new Vector3(
+            transform.position.x + Random.Range(-wanderRadius, wanderRadius),
+            transform.position.y,
+            transform.position.z + Random.Range(-wanderRadius, wanderRadius)
+        );
+
+        NavMeshHit hit;
+        if (NavMesh.SamplePosition(randomPoint, out hit, wanderRadius, NavMesh.AllAreas))
+        {
+            wanderPoint = hit.position;
+            isWandering = true;
+        }
     }
 
     void PlayZombieSound()
