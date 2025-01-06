@@ -12,6 +12,10 @@ public class CogerObjeto : MonoBehaviour
     private int objetosEntregados = 0; // Contador de objetos entregados
     public int totalObjetos = 3; // Total de objetos necesarios
 
+    [Header("Pantalla de Ganar")]
+    public GameObject PantallaGanar; // Pantalla que se muestra al ganar
+    public float retrasoPantalla = 1.0f; // Tiempo de retraso en segundos
+
     void Update()
     {
         // Soltar objeto con la tecla "R"
@@ -53,9 +57,19 @@ public class CogerObjeto : MonoBehaviour
             // Verificar si se han entregado todos los objetos
             if (objetosEntregados >= totalObjetos)
             {
-                contadorTexto.text = "          ¡BOTIN ROBADO!";
-               
+                StartCoroutine(MostrarPantallaGanarConRetraso());
             }
+        }
+    }
+
+    // Corrutina para mostrar la pantalla de ganar con un retraso
+    private IEnumerator MostrarPantallaGanarConRetraso()
+    {
+        yield return new WaitForSeconds(retrasoPantalla);
+
+        if (PantallaGanar != null)
+        {
+            Instantiate(PantallaGanar);
         }
     }
 
