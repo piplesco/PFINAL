@@ -7,8 +7,8 @@ public class ZombieController : MonoBehaviour
     public float attackRange = 2f;
     public float attackDamage = 25f;
     public float attackInterval = 3f;
-    public AudioClip zombieSound; // Sonido de gruñido
-    public AudioClip walkSound;  // Sonido de pasos
+    public AudioClip zombieSound; 
+    public AudioClip walkSound;  
 
     public float minDistanceForMaxVolume = 2f;
     public float maxDistanceForMinVolume = 10f;
@@ -17,8 +17,8 @@ public class ZombieController : MonoBehaviour
     private Animator animator;
     private Transform player;
     private Codigo_salud playerHealth;
-    private AudioSource audioSource; // Para sonidos generales
-    private AudioSource walkAudioSource; // Para sonidos de caminar
+    private AudioSource audioSource; 
+    private AudioSource walkAudioSource; 
     private float attackTimer;
     private Vector3 wanderPoint;
     private bool isWandering;
@@ -31,7 +31,7 @@ public class ZombieController : MonoBehaviour
         animator = GetComponent<Animator>();
 
         AudioSource[] audioSources = GetComponents<AudioSource>();
-        audioSource = audioSources[0]; // Primer AudioSource para sonidos generales
+        audioSource = audioSources[0]; 
         walkAudioSource = audioSources.Length > 1 ? audioSources[1] : gameObject.AddComponent<AudioSource>();
 
         player = GameObject.FindWithTag("Player").transform;
@@ -39,11 +39,11 @@ public class ZombieController : MonoBehaviour
 
         agent.speed = walkSpeed;
 
-        // Configurar walkAudioSource
+        
         walkAudioSource.clip = walkSound;
-        walkAudioSource.loop = true; // Que el sonido se repita
-        walkAudioSource.playOnAwake = false; // No reproducir automáticamente
-        walkAudioSource.volume = 0f; // Inicia en volumen cero, ajustable según distancia
+        walkAudioSource.loop = true; 
+        walkAudioSource.playOnAwake = false; 
+        walkAudioSource.volume = 0f; 
 
         InvokeRepeating("PlayZombieSound", 0, 7f);
     }

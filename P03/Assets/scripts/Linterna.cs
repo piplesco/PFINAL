@@ -9,7 +9,7 @@ public class Linterna : MonoBehaviour
     
     void Start()
     {
-        LuzLinterna.enabled = false; // Apagar la linterna al inicio
+        LuzLinterna.enabled = false; // Llanterna apagada al començar
     }
 
     
@@ -17,7 +17,7 @@ public class Linterna : MonoBehaviour
     {
         if (Input.GetKeyDown("f"))
         {
-            // abrircerrar linterna
+            // alternar estat llanterna
             LuzLinterna.enabled = !LuzLinterna.enabled;
         }
     }

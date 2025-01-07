@@ -1,24 +1,28 @@
 using System.Collections;
 using UnityEngine;
-using TMPro; // Importar TextMeshPro
+using TMPro; 
 
 public class CogerObjeto : MonoBehaviour
 {
-    public GameObject handPoint; // Punto donde se lleva el objeto
-    private GameObject pickedObject = null; // Objeto recogido actualmente
+    public GameObject handPoint; 
+    private GameObject pickedObject = null; 
 
-    // Referencia al marcador en la UI
+    
     public TMP_Text contadorTexto;
-    private int objetosEntregados = 0; // Contador de objetos entregados
-    public int totalObjetos = 3; // Total de objetos necesarios
+    private int objetosEntregados = 0; 
+    public int totalObjetos = 3; 
 
     [Header("Pantalla de Ganar")]
-    public GameObject PantallaGanar; // Pantalla que se muestra al ganar
-    public float retrasoPantalla = 1.0f; // Tiempo de retraso en segundos
+    public GameObject PantallaGanar; 
+    public float retrasoPantalla = 1.0f; 
+
+    [Header("Sonido")]
+    public AudioSource audioSource; 
+    public AudioClip sonidoMoneda; 
 
     void Update()
     {
-        // Soltar objeto con la tecla "R"
+        
         if (pickedObject != null && Input.GetKey("r"))
         {
             pickedObject.GetComponent<Rigidbody>().useGravity = true;
@@ -30,7 +34,7 @@ public class CogerObjeto : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        // Recoger objeto con la tecla "E"
+        
         if (other.gameObject.CompareTag("Objeto") && Input.GetKey("e") && pickedObject == null)
         {
             other.GetComponent<Rigidbody>().useGravity = false;
@@ -43,18 +47,24 @@ public class CogerObjeto : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        // Detectar interacción con el baúl
+        
         if (other.gameObject.CompareTag("Baul") && pickedObject != null)
         {
-            // Incrementar el contador y actualizar la UI
+            
             objetosEntregados++;
             ActualizarContador();
 
-            // Destruir el objeto entregado
+            
+            if (audioSource != null && sonidoMoneda != null)
+            {
+                audioSource.PlayOneShot(sonidoMoneda);
+            }
+
+            
             Destroy(pickedObject);
             pickedObject = null;
 
-            // Verificar si se han entregado todos los objetos
+            
             if (objetosEntregados >= totalObjetos)
             {
                 StartCoroutine(MostrarPantallaGanarConRetraso());
@@ -62,7 +72,7 @@ public class CogerObjeto : MonoBehaviour
         }
     }
 
-    // Corrutina para mostrar la pantalla de ganar con un retraso
+    
     private IEnumerator MostrarPantallaGanarConRetraso()
     {
         yield return new WaitForSeconds(retrasoPantalla);
@@ -73,10 +83,11 @@ public class CogerObjeto : MonoBehaviour
         }
     }
 
-    // Asegúrate de que este método esté fuera de otros métodos
+    
     private void ActualizarContador()
     {
-        // Actualizar el texto del marcador
+        
         contadorTexto.text = "OBJETOS SAQUEADOS: " + objetosEntregados + "/" + totalObjetos;
     }
 }
+
